@@ -48,3 +48,73 @@ describe("Positive Flow: Valid Card Data", () => {
     })
     
 })
+
+// Negative Flow: Empty Fields
+
+describe('Negative Flow: Empty Fields', () => {
+    beforeEach(() => {
+        cy.visit('https://demo.guru99.com/payment-gateway/process_purchasetoy.php')
+    })
+
+    it('should not submit when all fields are empty', () => {
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+
+    it('should not submit when card number is blank', () => {
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+
+    it('should not submit when expiry month is blank', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+
+    it('should not submit when expiry year is blank', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+
+    it('should not submit when CVV is blank', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php').should('not.include', '/process_purchasetoy.php')
+    })
+})
+
+// Negative Flow: Invalid Card Number
+describe('Negative Flow: Invalid Card Number', () => {
+    beforeEach(() => {
+        cy.visit('https://demo.guru99.com/payment-gateway/process_purchasetoy.php')
+    })
+
+    it('should show error for non-numeric card number', () => {
+        cy.get('#card_nmuber').type('abcdxyz')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+
+    it('should show error for too short card number', () => {
+        cy.get('#card_nmuber').type('1234')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/process_purchasetoy.php')
+    })
+})
