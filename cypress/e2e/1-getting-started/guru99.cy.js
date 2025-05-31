@@ -118,3 +118,71 @@ describe('Negative Flow: Invalid Card Number', () => {
         cy.url().should('include', '/process_purchasetoy.php')
     })
 })
+
+// Negative Flow: Expired Card
+describe('Negative Flow: Expired Card', () => {
+    beforeEach(() => {
+        cy.visit('https://demo.guru99.com/payment-gateway/process_purchasetoy.php')
+    })
+
+    it('should not allow expired year', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2020')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php').should('not.include', '/process_purchasetoy.php')
+    })
+
+    it('should not allow expired month in same year', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('1')
+        cy.get('#year').select('2024')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php').should('not.include', '/process_purchasetoy.php')
+    })
+})
+
+// Negative Flow: Invalid CVV
+describe('Negative Flow: Invalid CVV', () => {
+    beforeEach(() => {
+        cy.visit('https://demo.guru99.com/payment-gateway/process_purchasetoy.php')
+    })
+
+    it('should reject short CVV', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('12')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php').should('not.include', '/process_purchasetoy.php')
+    })
+
+    it('should reject non-numeric CVV', () => {
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('abc')
+        cy.get('input[name="submit"]').click()
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php').should('not.include', '/process_purchasetoy.php')
+    })
+})
+
+// Data Persistence / Form Reset (Optional)
+describe('Form Reset / Data Persistence', () => {
+    it('should clear the form after success', () => {
+        cy.visit('https://demo.guru99.com/payment-gateway/process_purchasetoy.php')
+        cy.get('#card_nmuber').type('4111111111111111')
+        cy.get('#month').select('6')
+        cy.get('#year').select('2026')
+        cy.get('#cvv_code').type('123')
+        cy.get('input[name="submit"]').click()
+
+        cy.url().should('include', '/payment-gateway/genearte_orderid.php')
+
+        // Navigate back
+        cy.go('back')
+        // cy.get('#card_nmuber').should('have.value', '')
+    })
+})
